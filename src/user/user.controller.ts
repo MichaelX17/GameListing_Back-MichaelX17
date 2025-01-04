@@ -36,8 +36,14 @@ export class UserController {
     }
     return this.userService.findOneByUsername(req.user.username);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/all')
+  async getAllUsers() {
+    return this.userService.findAllUsers();
+  }
   
-  @Put('update/:id')
+  @Post('update/:id')
   async updateUser(@Param('id') id: string, @Body() updateUserDto: Partial<CreateUserDto>) {
     const user = await this.userService.updateUser(id, updateUserDto);
     if (!user) {

@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateGameDto } from './dto/create-game.dto';
-import { Game, GameDocument } from './schemas/game.schema';
+import { Game, GameDocument, ProgressEnum } from './schemas/game.schema';
 import { HowLongToBeatService, HowLongToBeatEntry } from 'howlongtobeat';
 
 @Injectable()
@@ -14,7 +14,8 @@ export class GameService {
 
   async create(game: Game): Promise<Game> {
     const average = game.rating / game.hours;
-    const createdGame = new this.gameModel({ ...game, average });
+    const progress = ProgressEnum.None;
+    const createdGame = new this.gameModel({ ...game, average, progress });
     return createdGame.save();
   }
 

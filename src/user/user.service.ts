@@ -34,6 +34,14 @@ export class UserService {
     return await this.userModel.create(user);
   }
 
+  async findAllUsers(): Promise<User[] | null> {
+    const users = await this.userModel.find({ status: 'Active'}).exec();
+    if (!users || users.length === 0 ){
+      throw new HttpException('No Users Found', HttpStatus.NOT_FOUND);
+    }
+    return users;
+  }
+
   async findUserById(id: string): Promise<User | null> {
     return this.userModel.findById(id).exec();
   }

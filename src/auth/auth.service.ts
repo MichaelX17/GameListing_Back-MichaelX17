@@ -25,7 +25,6 @@ export class AuthService {
     if (!user) {
       throw new Error('Unauthorized');
     }
-    console.log('Usuario validado:', user._doc);
     const payload = { username: user._doc.username, sub: user._doc._id };
     return {
       access_token: this.jwtService.sign(payload),
