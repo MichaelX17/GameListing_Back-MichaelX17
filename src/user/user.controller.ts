@@ -1,15 +1,26 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, Request, UseGuards, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Put,
+  Delete,
+  Body,
+  Param,
+  Request,
+  UseGuards,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './schemas/user.schema';
-import { LoginUserDto } from './dto/login-user.dto';
+import { User, UserStatus, UserRole } from './schemas/user.schema';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { UsernameDto } from './dto/username.dto';
 
-@Controller('users')
+@Controller('/users')
 export class UserController {
-  constructor(
-    private readonly userService: UserService
-    ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post('/signup')
   async signup(@Body() createUserDto: CreateUserDto) {
@@ -17,19 +28,16 @@ export class UserController {
       username: createUserDto.username,
       email: createUserDto.email,
       password: createUserDto.password,
-      status: 'Active',
+      status: UserStatus.Active,
+      role: UserRole.User,
       pin: createUserDto.pin,
       gameList: [],
     };
     return this.userService.create(user);
   }
 
-  @Post('/login')
-  async login(@Body() loginDto: LoginUserDto) {
-  }
-
-  @Get('/profile')
   @UseGuards(JwtAuthGuard)
+  @Get('/profile')
   async getProfile(@Request() req) {
     if (!req.user || !req.user.username) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
@@ -42,22 +50,34 @@ export class UserController {
   async getAllUsers() {
     return this.userService.findAllUsers();
   }
-  
-  @Post('update/:id')
-  async updateUser(@Param('id') id: string, @Body() updateUserDto: Partial<CreateUserDto>) {
-    const user = await this.userService.updateUser(id, updateUserDto);
+
+  @UseGuards(JwtAuthGuard)
+  @Post('/update')
+  async updateUser( @Request() req, @Body() updateUserDto: Partial<UpdateUserDto>, ) {
+    if (!req.user || !req.user.username) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+    const user = await this.userService.updateUser(req.user.userId, updateUserDto);
     if (!user) {
-      throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+      throw new HttpException('Bad Request', HttpStatus.BAD_REQUEST);
     }
     return user;
   }
 
-  @Delete('delete/:id')
-  async deleteUser(@Param('id') id: string) {
-    const result = await this.userService.deleteUser(id);
+  @UseGuards(JwtAuthGuard)
+  @Post('/delete')
+  async deleteUser( @Request() req ) {
+    const result = await this.userService.deleteUser(req.user.userId);
     if (!result) {
       throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     }
     return { message: 'User deleted successfully' };
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/username')
+  async getUsersByUsername(@Body() usernameDto: UsernameDto) {
+    console.log("Username: ", usernameDto.username);
+    return this.userService.findUserByUsername(usernameDto.username);
   }
 }

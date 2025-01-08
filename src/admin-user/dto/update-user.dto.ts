@@ -1,7 +1,13 @@
 import { IsString, IsEmail, Length, IsNumberString, IsEnum, Matches, IsArray, IsMongoId } from 'class-validator';
 
+// Define el enum para el estado del usuario
+enum UserStatus {
+  Active = 'Active',
+  Inactive = 'Inactive',
+}
+
 // DTO para la creación de un usuario
-export class CreateUserDto {
+export class UpdateUserAsAdminDto {
   @IsString()
   @Matches(/^[a-zA-Z0-9]+$/, {
     message: 'Username must contain only letters and numbers.',
@@ -21,4 +27,8 @@ export class CreateUserDto {
     message: 'Pin must be exactly 6 numeric characters.',
   })
   pin: string;
+
+  @IsEnum(UserStatus, {
+    message: 'Status must be either "Active" or "Inactive".' })
+  status: UserStatus; // Propiedad de tipo enum para el estado del usuario
 }

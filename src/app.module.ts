@@ -7,6 +7,8 @@ import { AuthModule } from './auth/auth.module';
 import { ListModule } from './list/list.module';
 import { RawgModule } from './rawg/rawg.module';
 import { HttpModule } from '@nestjs/axios';
+import { AdminUserModule } from './admin-user/admin-user.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -23,7 +25,9 @@ import { HttpModule } from '@nestjs/axios';
     AuthModule,
     ListModule,
     RawgModule,
-    HttpModule
+    HttpModule,
+    AdminUserModule,
+    SearchModule
     // Aquí agregarás otros módulos según lo necesites
   ],
   controllers: [],

@@ -1,7 +1,7 @@
 import { IsString, IsEmail, Length, IsNumberString, IsEnum, Matches, IsArray, IsMongoId } from 'class-validator';
 
 // DTO para la creación de un usuario
-export class CreateUserDto {
+export class UpdateUserDto {
   @IsString()
   @Matches(/^[a-zA-Z0-9]+$/, {
     message: 'Username must contain only letters and numbers.',
