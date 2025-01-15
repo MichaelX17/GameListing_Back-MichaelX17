@@ -77,7 +77,6 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @Get('/username')
   async getUsersByUsername(@Body() usernameDto: UsernameDto) {
-    console.log("Username: ", usernameDto.username);
     return this.userService.findUserByUsername(usernameDto.username);
   }
 }

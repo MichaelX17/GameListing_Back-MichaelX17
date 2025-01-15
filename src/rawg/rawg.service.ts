@@ -25,6 +25,12 @@ export class RawgService {
     return response.data;
   }
 
+  async getGamesByIds(ids: string[]): Promise<any[]> {
+    const games = await Promise.all(ids.map((id) => this.getGameById(id)));
+    return games.filter((game) => game); // Filtra los valores nulos o indefinidos
+  }
+  
+
   //   async searchGameByName(search: string): Promise<any> {
   //     const apiUrl = this.configService.get<string>('RAWG_API_URL');
   //     const apiKey = this.configService.get<string>('RAWG_API_KEY');

@@ -16,4 +16,10 @@ export class SearchController {
   async searchByEmail(@Param('data') data: string) {
     return this.searchService.searchByEmail(data);
   }
+
+  // Endpoint para buscar por juego
+  @Get('/email/:data')
+  async searchGameByName(@Param('data') data: string) {
+    return this.searchService.searchGameByName(data);
+  }
 }

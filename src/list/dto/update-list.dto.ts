@@ -1,4 +1,4 @@
-import { IsString, Length, IsEnum, IsArray, ValidateNested, IsNotEmpty } from 'class-validator';
+import { IsString, Length, IsEnum, IsArray, ValidateNested, IsNotEmpty, IsOptional } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateGameDto } from '../../game/dto/create-game.dto';
 import { ListGameDto } from './list-game.dto';
@@ -26,24 +26,25 @@ enum RelevanceEnum {
   Low = 'Low',
 }
 
-export class CreateListDto {
-  @IsNotEmpty()
+export class UpdateListDto {
+  @IsOptional()
   @IsString()
   @Length(3, 50) // Ajusta la longitud según los requisitos de la app.
   name: string;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsEnum(SocialStatusEnum)
   socialStatus: SocialStatusEnum;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsEnum(RelevanceEnum)
   relevance: RelevanceEnum;
 
-  @IsNotEmpty()
+  @IsOptional()
   @IsEnum(GenreEnum)
   genre: GenreEnum;
 
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ListGameDto)

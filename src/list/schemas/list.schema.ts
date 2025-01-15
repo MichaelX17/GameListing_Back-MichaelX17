@@ -1,10 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Game, GameSchema } from '../../game/schemas/game.schema';
+import { GameSchema } from '../../game/schemas/game.schema';
+import { ListGame } from './list-game.schema';
 
 export type ListDocument = List & Document;
 
-enum GenreEnum {
+export enum GenreEnum {
     Action = 'Action',
     Adventure = 'Adventure',
     RPG = 'RPG',
@@ -15,17 +16,24 @@ enum GenreEnum {
     Puzzle = 'Puzzle',
 }
 
-enum StatusEnum {
+export enum SocialStatusEnum {
   Public = 'Public',
   Friends_Only = 'Friends_Only',
   Private = 'Private',
 }
 
-enum ProgressEnum {
+export enum ProgressEnum {
   None = 'None',
   Started = 'Started',
   Mid = 'Mid',
+  AlmostDone = 'Almost Done',
   Finished = 'Finished',
+}
+
+export enum RelevanceEnum {
+  High = 'High',
+  Mid = 'Mid',
+  Low = 'Low'
 }
 
 @Schema()
@@ -36,20 +44,23 @@ export class List {
   @Prop({type: String,  required: true, validate: /^[a-zA-Z0-9\s]*$/, })
   name: string;
 
-  @Prop({ type: Number, required: true, min: 0 })
-  order: number;
+  @Prop({ type: String, required: true, enum: SocialStatusEnum, default: SocialStatusEnum.Public })
+  socialStatus: SocialStatusEnum;
 
-  @Prop({ type: String, required: true, enum: StatusEnum })
-  status: StatusEnum;
-
-  @Prop({ type: String, required: true, enum: ProgressEnum })
-  progress: ProgressEnum;
+  @Prop({ type: String, required: true, enum: RelevanceEnum, default: RelevanceEnum.Mid })
+  relevance: RelevanceEnum;
 
   @Prop({ type: String, required: true, enum: GenreEnum })
   genre: GenreEnum
 
-  @Prop({ type: [GameSchema], required: true, default: [] })
-  games: Game[];
+  @Prop({ type: String, required: true, enum: ProgressEnum, default: ProgressEnum.None })
+  progress: ProgressEnum;
+
+  @Prop({ type: [ListGame], required: true, default: [] }) // Usar el esquema correcto
+  games: ListGame[];
+
+  @Prop({ type: Number, required: true })
+  gamesCount: number
 }
 
 export const ListSchema = SchemaFactory.createForClass(List);

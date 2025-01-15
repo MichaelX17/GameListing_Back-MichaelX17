@@ -6,6 +6,7 @@ import { HttpModule } from '@nestjs/axios';
 @Module({
   imports: [HttpModule],
   controllers: [RawgController],
-  providers: [RawgService]
+  providers: [RawgService],
+  exports:[RawgService]
 })
 export class RawgModule {}

@@ -8,20 +8,14 @@ import { Game } from './schemas/game.schema';
 export class GameController {
   constructor(private readonly gameService: GameService) { }
 
-  @Post()
-  async create(@Body() createGameDto: CreateGameDto) {
-    return this.gameService.create(createGameDto as Game);
-  }
+  // @Post()
+  // async create(@Body() createGameDto: CreateGameDto) {
+  //   return this.gameService.create(createGameDto as Game);
+  // }
 
   @Get()
   async findAll() {
     return this.gameService.findAll();
-  }
-
-  @Get('/:name')
-  async findGameByName(@Param('name') gameName: string) {
-    console.log("Name: ", gameName);
-    return this.gameService.findGameByName(gameName);
   }
 
 }

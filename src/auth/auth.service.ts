@@ -36,7 +36,7 @@ export class AuthService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const payload = { username: user._doc.username, sub: user._doc._id };
+    const payload = { username: user._doc.username, sub: user._doc._id, userRole: user._doc.role };
     return {
       access_token: this.jwtService.sign(payload),
     };

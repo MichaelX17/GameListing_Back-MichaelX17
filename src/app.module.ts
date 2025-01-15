@@ -9,6 +9,7 @@ import { RawgModule } from './rawg/rawg.module';
 import { HttpModule } from '@nestjs/axios';
 import { AdminUserModule } from './admin-user/admin-user.module';
 import { SearchModule } from './search/search.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { SearchModule } from './search/search.module';
     RawgModule,
     HttpModule,
     AdminUserModule,
-    SearchModule
+    SearchModule,
+    SharedModule
     // Aquí agregarás otros módulos según lo necesites
   ],
   controllers: [],
