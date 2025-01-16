@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateGameDto } from './dto/create-game.dto';
-import { Game, GameDocument, ProgressEnum } from './schemas/game.schema';
+import { Game, GameDocument } from './schemas/game.schema';
 
 @Injectable()
 export class GameService {
@@ -10,7 +10,7 @@ export class GameService {
     @InjectModel(Game.name) private gameModel: Model<GameDocument>,
   ) { }
 
-  async create(game: Game): Promise<Game> {
+  async create(game: Partial<Game>): Promise<Game> {
     // Verificar si ya existe un juego con el mismo rawgId
     const existingGame = await this.gameModel.findOne({ rawgId: game.rawgId });
     if (existingGame) {
@@ -20,12 +20,11 @@ export class GameService {
         );
     }
 
-    // Calcular el average y asignar progress por defecto
+    // Calcular el average
     const average = game.rating / game.playtime;
-    const progress = ProgressEnum.None;
 
     // Crear y guardar el nuevo juego
-    const createdGame = new this.gameModel({ ...game, average, progress });
+    const createdGame = new this.gameModel({ ...game, average });
     return createdGame.save();
 }
 
@@ -36,9 +35,6 @@ export class GameService {
 
   async findGameByRawgId(id: string): Promise<Game> {
     const game = await this.gameModel.findOne({ rawgId: id })
-    if(!game){
-      throw new HttpException('No game found', HttpStatus.NOT_FOUND)
-    }
     return game;
   }
 
@@ -49,9 +45,6 @@ export class GameService {
 
   async findOneByRawgId(id: string){
     const game = await this.gameModel.find({ rawgId: id })
-    if(!game){
-      throw new HttpException('No game found', HttpStatus.NOT_FOUND)
-    }
     return game;
   }
 

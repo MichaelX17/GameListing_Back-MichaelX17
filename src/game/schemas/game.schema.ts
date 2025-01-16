@@ -3,16 +3,8 @@ import { Document, Types } from 'mongoose';
 
 export type GameDocument = Game & Document;
 
-export enum ProgressEnum {
-  None = 'None',
-  InProgress = 'InProgress',
-  Finished = 'Finished',
-}
-
 @Schema()
 export class Game extends Document {
-  @Prop({ type: Types.ObjectId }) // Asegúrate de que sea Types.ObjectId
-  _id: Types.ObjectId;
 
   @Prop({ required: true })
   rawgId: string;

@@ -12,7 +12,7 @@ export enum ProgressEnum {
   Finished = 'Finished',
 }
 
-@Schema()
+@Schema({ _id: false }) // Desactiva el _id en subdocumentos
 export class ListGame {
   @Prop({ type: Types.ObjectId, ref: 'Game', required: true })
   gameId: Types.ObjectId;
@@ -21,4 +21,4 @@ export class ListGame {
   progress: ProgressEnum;
 }
 
-export const ListSchema = SchemaFactory.createForClass(ListGame);
+export const ListGameSchema = SchemaFactory.createForClass(ListGame);
