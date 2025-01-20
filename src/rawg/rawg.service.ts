@@ -10,50 +10,39 @@ export class RawgService {
     private readonly httpService: HttpService,
   ) {}
 
-  async getGameById(id: string): Promise<any> {
+  async getGameById(id: string): Promise<any | null> {
     const apiUrl = this.configService.get<string>('RAWG_API_URL');
     const apiKey = this.configService.get<string>('RAWG_API_KEY');
-
+  
     if (!id) {
       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
     }
-    const response = await firstValueFrom(
-      this.httpService.get(`${apiUrl}/${id}`, {
-        params: { key: apiKey },
-      }),
-    );
-    return response.data;
+  
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(`${apiUrl}/${id}`, {
+          params: { key: apiKey },
+        }),
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        // Si el error es un 404, devolver null en lugar de lanzar una excepción
+        return null;
+      }
+      // Re-lanzar otros errores no manejados
+      throw new HttpException(
+        error.message || 'Error fetching game data',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
+  
 
   async getGamesByIds(ids: string[]): Promise<any[]> {
     const games = await Promise.all(ids.map((id) => this.getGameById(id)));
     return games.filter((game) => game); // Filtra los valores nulos o indefinidos
   }
-  
-
-  //   async searchGameByName(search: string): Promise<any> {
-  //     const apiUrl = this.configService.get<string>('RAWG_API_URL');
-  //     const apiKey = this.configService.get<string>('RAWG_API_KEY');
-
-  //     if (!search) {
-  //       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-  //     }
-  //     const encodedSearch = encodeURIComponent(search);
-  //     console.log('Search: ', encodedSearch);
-  //     const response = await firstValueFrom(
-  //       this.httpService.get(`${apiUrl}`, {
-  //         params: {
-  //           key: apiKey,
-  //           search: encodedSearch,
-  //         },
-  //       }),
-  //     );
-  //     if (!response) {
-  //       throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-  //     }
-  //     console.log('Response: ', response);
-  //     return response;
-  //   }
 
   async searchGameByName(search: string): Promise<any> {
     const apiUrl = this.configService.get<string>('RAWG_API_URL');

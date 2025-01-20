@@ -16,9 +16,6 @@ import { List } from './schemas/list.schema';
 import { CreateListDto } from './dto/create-list.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateListDto } from './dto/update-list.dto';
-import { CreateGameDto } from '../game/dto/create-game.dto';
-import { ListGameDto } from './dto/list-game.dto';
-import { Game } from 'src/game/schemas/game.schema';
 import { AddGamesDto } from './dto/add-game.dto';
 
 @Controller('list')
