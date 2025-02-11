@@ -17,10 +17,11 @@ import { CreateListDto } from './dto/create-list.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { UpdateListDto } from './dto/update-list.dto';
 import { AddGamesDto } from './dto/add-game.dto';
+import { RemoveGamesDto } from './dto/remove-game.dto';
 
 @Controller('list')
 export class ListController {
-  constructor(private readonly listService: ListService) {}
+  constructor(private readonly listService: ListService) { }
 
   @UseGuards(JwtAuthGuard)
   @Get('/all')
@@ -50,6 +51,7 @@ export class ListController {
     return this.listService.update(req.user.userId, id, updateListDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post(':listId/add-games')
   async addGamesToList(
     @Param('listId') listId: string,
@@ -64,6 +66,21 @@ export class ListController {
     return this.listService.addGamesToList(listId, rawgIds);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Post(':listId/remove-games')
+  async removeGamesFromList(
+    @Param('listId') listId: string,
+    @Body() removeGamesDto: RemoveGamesDto,
+  ) {
+    const { rawgIds } = removeGamesDto;
+  
+    if (!listId) {
+      throw new HttpException('List ID is required', HttpStatus.BAD_REQUEST);
+    }
+  
+    return this.listService.removeGamesFromList(listId, rawgIds);
+  }
+  
   @UseGuards(JwtAuthGuard)
   @Delete('/delete/:id')
   async delete(@Request() req, @Param('id') id: string) {

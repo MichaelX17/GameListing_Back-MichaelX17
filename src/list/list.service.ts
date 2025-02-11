@@ -415,16 +415,15 @@ export class ListService {
       );
   
       if (!isAlreadyInList) {
-        gameReferences.push({ gameId: game.id, progress: ProgressEnum.None });
+        const gameId = this.sharedService.toObjectId(game.id);
+        gameReferences.push({ gameId: gameId, progress: ProgressEnum.None });
         console.log(`Added game to references: ${game.name}`);
       }
     }
   
     console.log(`Game references to add:`, gameReferences);
   
-    // Agregar los juegos nuevos a la lista
-    list.games.push(...gameReferences);
-    console.log(`Games in the list after push:`, list.games);
+    
   
     // Ordenar los juegos en la lista por Average
     list.games.sort((a, b) => {
@@ -440,6 +439,11 @@ export class ListService {
   
       return averageB - averageA;
     });
+
+    // Agregar los juegos nuevos a la lista
+    list.games.push(...gameReferences);
+    console.log(`Games in the list after push:`, list.games);
+    console.log("Games: ", list.games);
   
     list.gamesCount = list.games.length;
   
@@ -448,5 +452,28 @@ export class ListService {
   
     return list;
   }
+
+  async removeGamesFromList(listId: string, rawgIds: string[]): Promise<List> {
+    const list = await this.listModel.findById(listId).populate('games.gameId');
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+  
+    const gamesToRemove = new Set(rawgIds);
+  
+    // Filtrar los juegos que deben permanecer en la lista
+    list.games = list.games.filter((listGame) => {
+      const game = listGame.gameId as unknown as Game;
+      return game && !gamesToRemove.has(game.rawgId);
+    });
+  
+    list.gamesCount = list.games.length;
+  
+    await list.save();
+    console.log(`List updated successfully, remaining games: ${list.games.length}`);
+  
+    return list;
+  }
+  
   
 }
