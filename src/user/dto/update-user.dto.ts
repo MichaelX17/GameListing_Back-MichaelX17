@@ -1,24 +1,31 @@
-import { IsString, IsEmail, Length, IsNumberString, IsEnum, Matches, IsArray, IsMongoId } from 'class-validator';
+import { IsString, IsEmail, Length, Matches, IsOptional, ValidateIf } from 'class-validator';
 
-// DTO para la creación de un usuario
 export class UpdateUserDto {
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
   @Matches(/^[a-zA-Z0-9]+$/, {
     message: 'Username must contain only letters and numbers.',
   })
-  @Length(1, 20) // El nombre de usuario debe tener entre 1 y 20 caracteres
+  @Length(1, 20)
+  @IsOptional()
   username: string;
 
+  @ValidateIf((_, value) => value !== undefined)
   @IsEmail()
+  @IsOptional()
   email: string;
 
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
-  @Length(8, 30) // La contraseña debe tener entre 8 y 30 caracteres
+  @Length(8, 30)
+  @IsOptional()
   password: string;
 
+  @ValidateIf((_, value) => value !== undefined)
   @IsString()
   @Matches(/^[0-9]{6}$/, {
     message: 'Pin must be exactly 6 numeric characters.',
   })
+  @IsOptional()
   pin: string;
 }
