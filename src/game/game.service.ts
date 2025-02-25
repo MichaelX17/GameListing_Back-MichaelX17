@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CreateGameDto } from './dto/create-game.dto';
 import { Game, GameDocument } from './schemas/game.schema';
 
 @Injectable()
@@ -30,6 +29,10 @@ export class GameService {
 
 
   async findAll(): Promise<Game[]> {
+    return this.gameModel.find().sort({ name: 'ascending' }).exec();
+  }
+
+  async findAllSorted(): Promise<Game[]> {
     return this.gameModel.find().sort({ average: -1 }).exec();
   }
 
@@ -71,7 +74,9 @@ export class GameService {
     return this.findGamesByRawgIds(rawgIds);
   }
   
-  
+  async findLocalGamesByMongoId(gameIds: string[]): Promise<Game[]> {
+    return this.gameModel.find({ _id: { $in: gameIds } });
+  }
   
   
   

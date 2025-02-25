@@ -4,6 +4,7 @@ import {
   HttpException,
   HttpStatus,
   Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { RawgService } from './rawg.service';
@@ -23,10 +24,15 @@ export class RawgController {
   }
 
   @Get('/search/:search')
-  async searchGamesByName(@Param('search') search: string) {
-    if (!search) {
-      throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
-    }
-    return await this.rawgService.searchGameByName(search);
+async searchGamesByName(
+  @Param('search') search: string,
+  @Query('page') page: number = 1,
+  @Query('page_size') pageSize: number = 10,
+) {
+  if (!search) {
+    throw new HttpException('Not Found', HttpStatus.NOT_FOUND);
   }
+  return await this.rawgService.searchGameByName(search, page, pageSize);
+}
+
 }

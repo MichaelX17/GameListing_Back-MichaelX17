@@ -8,7 +8,6 @@ import { ListModule } from './list/list.module';
 import { RawgModule } from './rawg/rawg.module';
 import { HttpModule } from '@nestjs/axios';
 import { AdminUserModule } from './admin-user/admin-user.module';
-import { SearchModule } from './search/search.module';
 import { SharedModule } from './shared/shared.module';
 
 @Module({
@@ -28,7 +27,6 @@ import { SharedModule } from './shared/shared.module';
     RawgModule,
     HttpModule,
     AdminUserModule,
-    SearchModule,
     SharedModule
     // Aquí agregarás otros módulos según lo necesites
   ],

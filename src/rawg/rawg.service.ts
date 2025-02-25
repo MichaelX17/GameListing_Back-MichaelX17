@@ -44,49 +44,57 @@ export class RawgService {
     return games.filter((game) => game); // Filtra los valores nulos o indefinidos
   }
 
-  async searchGameByName(search: string): Promise<any> {
+  async searchGameByName(search: string, page: number = 1, pageSize: number = 10): Promise<any> {
     const apiUrl = this.configService.get<string>('RAWG_API_URL');
     const apiKey = this.configService.get<string>('RAWG_API_KEY');
-
+  
     if (!search) {
       throw new HttpException(
         'Search term is required',
         HttpStatus.BAD_REQUEST,
       );
     }
-
+  
     try {
       const response = await firstValueFrom(
         this.httpService.get(apiUrl, {
           params: {
             key: apiKey,
             search,
+            page,
+            page_size: pageSize,
           },
         }),
       );
-
+  
       if (response.data.count === 0) {
         throw new HttpException(
           'No games found for the given search term',
           HttpStatus.NOT_FOUND,
         );
       }
-
-      return response.data;
+  
+      return {
+        total_results: response.data.count,
+        page,
+        page_size: pageSize,
+        results: response.data.results,
+      };
     } catch (error) {
       console.error(
         'Error in RAWG API request:',
         error.response?.data || error.message,
       );
-
+  
       if (error.response?.status === 404) {
         throw new HttpException('Game not found', HttpStatus.NOT_FOUND);
       }
-
+  
       throw new HttpException(
         'Error fetching data from RAWG API',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
+  
 }

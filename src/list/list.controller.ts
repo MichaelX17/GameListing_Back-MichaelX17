@@ -73,17 +73,24 @@ export class ListController {
     @Body() removeGamesDto: RemoveGamesDto,
   ) {
     const { rawgIds } = removeGamesDto;
-  
+
     if (!listId) {
       throw new HttpException('List ID is required', HttpStatus.BAD_REQUEST);
     }
-  
+
     return this.listService.removeGamesFromList(listId, rawgIds);
   }
-  
+
   @UseGuards(JwtAuthGuard)
   @Delete('/delete/:id')
   async delete(@Request() req, @Param('id') id: string) {
     return this.listService.deleteList(req.user.userId, id);
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':listId/games')
+  async getListWithGames(@Param('listId') listId: string) {
+    return this.listService.getListWithGames(listId);
+  }
+
 }

@@ -18,4 +18,9 @@ export class GameController {
     return this.gameService.findAll();
   }
 
+  @Get("/sorted")
+  async findAllSorted() {
+    return this.gameService.findAllSorted();
+  }
+
 }

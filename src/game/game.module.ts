@@ -10,6 +10,6 @@ import { Game, GameSchema } from './schemas/game.schema';
   ],
   providers: [GameService],
   controllers: [GameController], 
-  exports:[GameService]
+  exports:[GameService, MongooseModule]
 })
 export class GameModule {}

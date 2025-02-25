@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpException,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -52,7 +53,7 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('/update')
+  @Put('/update')
   async updateUser(@Request() req, @Body() updateUserDto: Record<string, any>) {
     if (!req.user || !req.user.username) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
@@ -96,8 +97,8 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Get('/username')
-  async getUsersByUsername(@Body() usernameDto: UsernameDto) {
-    return this.userService.findUserByUsername(usernameDto.username);
+  @Get('/:username')
+  async getUsersByUsername(@Param('username') username: string) {
+    return this.userService.findUserByUsername(username);
   }
 }

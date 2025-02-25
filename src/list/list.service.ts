@@ -9,6 +9,7 @@ import { RawgService } from '../rawg/rawg.service';
 import { GameService } from '../game/game.service';
 import { ListGame, ProgressEnum } from './schemas/list-game.schema';
 import { CreateGameDto } from '../game/dto/create-game.dto';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class ListService {
@@ -18,7 +19,7 @@ export class ListService {
     private readonly sharedService: SharedService,
     private readonly rawgService: RawgService,
     private readonly gameService: GameService,
-  ) {}
+  ) { }
 
   ///////////////////////////////
   /////////////Utils/////////////
@@ -180,277 +181,213 @@ export class ListService {
     return list.save();
   }
 
+  // async addGamesToList2(listId: string, rawgIds: string[]): Promise<List> {
+  //   const list = await this.listModel.findById(listId);
+  //   if (!list) {
+  //     throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+  //   }
+
+  //   // Obtener juegos existentes en BD local
+  //   const existingGames = await this.gameService.findGamesByRawgIds(rawgIds)
+  //   const existingGameMap = new Map(existingGames.map(game => [game.rawgId, game._id]));
+
+  //   // Filtrar IDs que no están en la base de datos
+  //   const missingRawgIds = rawgIds.filter(id => !existingGameMap.has(id));
+
+  //   // Obtener datos de juegos desde la API y guardarlos
+  //   for (const rawgId of missingRawgIds) {
+  //     const gameData = await this.gameService.findGameByRawgId(rawgId);
+  //     if (gameData) {
+  //       const newGame = await this.gameService.create({
+  //         rawgId: gameData.id,
+  //         name: gameData.name,
+  //         rating: gameData.rating,
+  //         released: gameData.released,
+  //         playtime: gameData.playtime,
+  //         background_image: gameData.background_image,
+  //         background_image_additional: gameData.background_image_additional,
+  //         genres: Array.isArray(gameData.genres)
+  //           ? gameData.genres.map((g: any) => g.name)
+  //           : [],
+
+  //         developers: Array.isArray(gameData.developers)
+  //           ? gameData.developers.map((d: any) => d.name)
+  //           : [],
+
+
+  //       });
+  //       existingGameMap.set(rawgId, newGame._id);
+  //     }
+  //   }
+
+  //   // Construir lista de juegos con progreso preservado
+  //   const updatedGamesMap = new Map(list.games.map(g => [g.gameId.toString(), g.progress]));
+  //   const updatedGames: ListGame[] = rawgIds.map(rawgId => ({
+  //     gameId: existingGameMap.get(rawgId),
+  //     progress: updatedGamesMap.get(existingGameMap.get(rawgId)?.toString()) || 'None',
+  //   }));
+
+  //   // Obtener juegos para ordenarlos
+  //   const sortedGames = await this.findLocalGamesByMongoId(updatedGames.map(g => g.gameId));
+  //   sortedGames.sort((a, b) => (b.rating / b.playtime) - (a.rating / a.playtime));
+
+  //   // Guardar lista con juegos ordenados
+  //   list.games = sortedGames.map(game => ({
+  //     gameId: game._id,
+  //     progress: updatedGamesMap.get(game._id.toString()) || 'None',
+  //   }));
+  //   list.gamesCount = list.games.length;
+  //   return list.save();
+  // }
+
   // async addGamesToList(listId: string, rawgIds: string[]): Promise<List> {
-  //   const list = await this.listModel.findById(listId).populate('games.gameId');
+  //   const list = await this.listModel.findById(listId);
   //   if (!list) {
   //     throw new HttpException('List not found', HttpStatus.NOT_FOUND);
   //   }
 
-  //   const gameReferences: ListGame[] = [];
-  //   const processedRawgIds = new Set(); // Para evitar procesar duplicados en rawgIds
+  //   // Obtener juegos existentes en BD local
+  //   const existingGames = await this.gameService.findGamesByRawgIds(rawgIds);
 
-  //   for (const rawgId of rawgIds) {
-  //     if (processedRawgIds.has(rawgId)) continue; // Ignorar IDs duplicados en la solicitud
-  //     processedRawgIds.add(rawgId);
+  //   // Asegúrate de que game._id sea de tipo ObjectId
+  //   const existingGameMap = new Map<string, ObjectId>(
+  //     existingGames.map(game => [game.rawgId, game._id as ObjectId]) // Cast explícito a ObjectId
+  //   );
 
-  //     // Buscar el juego en la tabla Games
-  //     let game = await this.gameService.findGameByRawgId(rawgId);
+  //   // Filtrar IDs que no están en la base de datos
+  //   const missingRawgIds = rawgIds.filter(id => !existingGameMap.has(id));
 
-  //     if (!game) {
-  //       // Si no existe, consultar la API de RAWG y guardarlo en Games
-  //       const rawgGameData = await this.rawgService.getGameById(rawgId);
-
-  //       const rawgGame: Partial<Game> = {
-  //         rawgId: rawgGameData.id,
-  //         name: rawgGameData.name,
-  //         rating: rawgGameData.rating,
-  //         released: rawgGameData.released,
-  //         playtime: rawgGameData.playtime,
-  //         background_image: rawgGameData.background_image,
-  //         background_image_additional: rawgGameData.background_image_additional,
-  //         genres: rawgGameData.genres.map((g: any) => g.name),
-  //         developers: rawgGameData.developers.map((d: any) => d.name),
-  //       };
-
-  //       game = await this.gameService.create(rawgGame);
-  //     }
-
-  //     // Verificar si ya está en la lista usando game._id directamente
-  //     const isAlreadyInList = list.games.some(
-  //       (listGame) => listGame.gameId.equals(game.id) // Comparar ObjectId correctamente
-  //     );
-
-  //     if (!isAlreadyInList) {
-  //       // Agregar el juego a la lista de referencias si no está ya presente
-  //       gameReferences.push({ gameId: game.id, progress: ProgressEnum.None });
+  //   // Obtener datos de juegos desde la API y guardarlos
+  //   for (const rawgId of missingRawgIds) {
+  //     const gameData = await this.gameService.findGameByRawgId(rawgId);
+  //     if (gameData) {
+  //       const newGame = await this.gameService.create({
+  //         rawgId: gameData.id,
+  //         name: gameData.name,
+  //         rating: gameData.rating,
+  //         released: gameData.released,
+  //         playtime: gameData.playtime,
+  //         background_image: gameData.background_image,
+  //         background_image_additional: gameData.background_image_additional,
+  //         genres: Array.isArray(gameData.genres)
+  //           ? gameData.genres.map((g: any) => g.name)
+  //           : [],
+  //         developers: Array.isArray(gameData.developers)
+  //           ? gameData.developers.map((d: any) => d.name)
+  //           : [],
+  //       });
+  //       existingGameMap.set(rawgId, newGame._id as ObjectId); // Cast explícito a ObjectId
   //     }
   //   }
 
-  //   // Agregar los juegos nuevos a la lista
-  //   list.games.push(...gameReferences);
+  //   // Construir lista de juegos con progreso preservado
+  //   const updatedGamesMap = new Map<string, ProgressEnum | 'None'>(
+  //     list.games.map(g => [g.gameId.toString(), g.progress])
+  //   );
+
+  //   const updatedGames: ListGame[] = rawgIds.map(rawgId => ({
+  //     gameId: existingGameMap.get(rawgId) as Types.ObjectId, // Usa Types.ObjectId en lugar de ObjectId
+  //     progress: updatedGamesMap.get(existingGameMap.get(rawgId)?.toString()) as ProgressEnum || ProgressEnum.None, // Asegúrate de que sea de tipo ProgressEnum
+  //   }));
+
+  //   // Obtener juegos para ordenarlos
+  //   const sortedGames = await this.gameService.findLocalGamesByMongoId(
+  //     updatedGames.map(g => g.gameId.toString()) // Convierte ObjectId a string
+  //   );
+  //   sortedGames.sort((a, b) => (b.rating / b.playtime) - (a.rating / a.playtime));
+
+  //   // Guardar lista con juegos ordenados
+  //   list.games = sortedGames.map(game => ({
+  //     gameId: game._id as Types.ObjectId, // Cast explícito a Types.ObjectId
+  //     progress: updatedGamesMap.get(game._id.toString()) as ProgressEnum || ProgressEnum.None, // Asegúrate de que sea de tipo ProgressEnum
+  //   }));
+
   //   list.gamesCount = list.games.length;
-
-  //   // Guardar la lista actualizada
-  //   return list.save();
-  // }
-
-  // async addGamesToList2(listId: string, rawgIds: string[]): Promise<List> {
-  //   const list = await this.listModel.findById(listId).populate('games.gameId');
-  //   if (!list) {
-  //     throw new HttpException('List not found', HttpStatus.NOT_FOUND);
-  //   }
-
-  //   const gameReferences: ListGame[] = [];
-  //   const processedRawgIds = new Set(); // Para evitar procesar duplicados en rawgIds
-
-  //   for (const rawgId of rawgIds) {
-  //     if (processedRawgIds.has(rawgId)) continue; // Ignorar IDs duplicados en la solicitud
-  //     processedRawgIds.add(rawgId);
-
-  //     // Buscar el juego en la tabla Games
-  //     let game = await this.gameService.findGameByRawgId(rawgId);
-
-  //     if (!game) {
-  //       // Si no existe, consultar la API de RAWG y guardarlo en Games
-  //       const rawgGameData = await this.rawgService.getGameById(rawgId);
-
-  //       if (!rawgGameData) {
-  //         // Si no se encuentra el juego en RAWG, continuar con el siguiente ID
-  //         console.warn(`Game with RAWG ID ${rawgId} not found.`);
-  //         continue;
-  //       }
-
-  //       const rawgGame: Partial<Game> = {
-  //         rawgId: rawgGameData.id,
-  //         name: rawgGameData.name,
-  //         rating: rawgGameData.rating,
-  //         released: rawgGameData.released,
-  //         playtime: rawgGameData.playtime,
-  //         background_image: rawgGameData.background_image,
-  //         background_image_additional: rawgGameData.background_image_additional,
-  //         genres: rawgGameData.genres.map((g: any) => g.name),
-  //         developers: rawgGameData.developers.map((d: any) => d.name),
-  //       };
-
-  //       game = await this.gameService.create(rawgGame);
-  //     }
-
-  //     // Verificar si ya está en la lista usando game._id directamente
-  //     const isAlreadyInList = list.games.some(
-  //       (listGame) => listGame.gameId.equals(game.id), // Comparar ObjectId correctamente
-  //     );
-
-  //     if (!isAlreadyInList) {
-  //       // Agregar el juego a la lista de referencias si no está ya presente
-  //       gameReferences.push({ gameId: game.id, progress: ProgressEnum.None });
-  //     }
-  //   }
-
-  //   // Agregar los juegos nuevos a la lista
-  //   list.games.push(...gameReferences);
-  //   list.gamesCount = list.games.length;
-
-  //   // Guardar la lista actualizada
-  //   return list.save();
-  // }
-
-  // async addGamesToList2(listId: string, rawgIds: string[]): Promise<List> {
-  //   const list = await this.listModel.findById(listId).populate('games.gameId');
-  //   if (!list) {
-  //     throw new HttpException('List not found', HttpStatus.NOT_FOUND);
-  //   }
-
-  //   const gameReferences: ListGame[] = [];
-  //   const processedRawgIds = new Set(); // Para evitar procesar duplicados en rawgIds
-
-  //   for (const rawgId of rawgIds) {
-  //     if (processedRawgIds.has(rawgId)) continue; // Ignorar IDs duplicados en la solicitud
-  //     processedRawgIds.add(rawgId);
-
-  //     // Buscar el juego en la tabla Games
-  //     let game = await this.gameService.findGameByRawgId(rawgId);
-
-  //     if (!game) {
-  //       // Si no existe, consultar la API de RAWG y guardarlo en Games
-  //       const rawgGameData = await this.rawgService.getGameById(rawgId);
-
-  //       if (!rawgGameData) {
-  //         // Si no se encuentra el juego en RAWG, continuar con el siguiente ID
-  //         console.warn(`Game with RAWG ID ${rawgId} not found.`);
-  //         continue;
-  //       }
-
-  //       const rawgGame: Partial<Game> = {
-  //         rawgId: rawgGameData.id,
-  //         name: rawgGameData.name,
-  //         rating: rawgGameData.rating,
-  //         released: rawgGameData.released,
-  //         playtime: rawgGameData.playtime,
-  //         background_image: rawgGameData.background_image,
-  //         background_image_additional: rawgGameData.background_image_additional,
-  //         genres: rawgGameData.genres.map((g: any) => g.name),
-  //         developers: rawgGameData.developers.map((d: any) => d.name),
-  //       };
-
-  //       game = await this.gameService.create(rawgGame);
-  //     }
-
-  //     // Verificar si ya está en la lista usando game._id directamente
-  //     const isAlreadyInList = list.games.some(
-  //       (listGame) => listGame.gameId.equals(game.id), // Comparar ObjectId correctamente
-  //     );
-
-  //     if (!isAlreadyInList) {
-  //       // Agregar el juego a la lista de referencias si no está ya presente
-  //       gameReferences.push({ gameId: game.id, progress: ProgressEnum.None });
-  //     }
-  //   }
-
-  //   // Agregar los juegos nuevos a la lista
-  //   list.games.sort((a, b) => {
-  //     // Verificar y convertir gameId a Game
-  //     const gameA =
-  //       a.gameId instanceof Object ? (a.gameId as unknown as Game) : null;
-  //     const gameB =
-  //       b.gameId instanceof Object ? (b.gameId as unknown as Game) : null;
-
-  //     if (!gameA || !gameB) {
-  //       // Si no es posible convertir alguno, tratar como iguales
-  //       return 0;
-  //     }
-
-  //     const averageA = gameA.rating / (gameA.playtime || 1); // Evitar división por 0
-  //     const averageB = gameB.rating / (gameB.playtime || 1);
-
-  //     return averageB - averageA; // Orden descendente
-  //   });
-
-  //   // Actualizar el conteo de juegos
-  //   list.gamesCount = list.games.length;
-
-  //   // Guardar la lista actualizada
   //   return list.save();
   // }
 
   async addGamesToList(listId: string, rawgIds: string[]): Promise<List> {
-    const list = await this.listModel.findById(listId).populate('games.gameId');
+    const list = await this.listModel.findById(listId);
     if (!list) {
       throw new HttpException('List not found', HttpStatus.NOT_FOUND);
     }
   
-    const gameReferences: ListGame[] = [];
-    const processedRawgIds = new Set();
+    // Obtener juegos existentes en BD local
+    const existingGames = await this.gameService.findGamesByRawgIds(rawgIds);
   
-    for (const rawgId of rawgIds) {
-      if (processedRawgIds.has(rawgId)) continue;
-      processedRawgIds.add(rawgId);
+    // Mapear los juegos existentes por su rawgId
+    const existingGameMap = new Map<string, ObjectId>(
+      existingGames.map(game => [game.rawgId, game._id as ObjectId]) // Cast explícito a ObjectId
+    );
   
-      let game = await this.gameService.findGameByRawgId(rawgId);
+    // Filtrar IDs que no están en la base de datos
+    const missingRawgIds = rawgIds.filter(id => !existingGameMap.has(id));
   
-      if (!game) {
-        const rawgGameData = await this.rawgService.getGameById(rawgId);
-  
-        if (!rawgGameData) {
-          console.warn(`Game with RAWG ID ${rawgId} not found.`);
-          continue;
-        }
-  
-        const rawgGame: Partial<Game> = {
-          rawgId: rawgGameData.id,
-          name: rawgGameData.name,
-          rating: rawgGameData.rating,
-          released: rawgGameData.released,
-          playtime: rawgGameData.playtime,
-          background_image: rawgGameData.background_image,
-          background_image_additional: rawgGameData.background_image_additional,
-          genres: rawgGameData.genres.map((g: any) => g.name),
-          developers: rawgGameData.developers.map((d: any) => d.name),
-        };
-  
-        game = await this.gameService.create(rawgGame);
-      }
-  
-      const isAlreadyInList = list.games.some(
-        (listGame) => listGame.gameId.equals(game.id),
-      );
-  
-      if (!isAlreadyInList) {
-        const gameId = this.sharedService.toObjectId(game.id);
-        gameReferences.push({ gameId: gameId, progress: ProgressEnum.None });
-        console.log(`Added game to references: ${game.name}`);
+    // Obtener datos de juegos desde la API y guardarlos
+    for (const rawgId of missingRawgIds) {
+      const gameData = await this.rawgService.getGameById(rawgId);
+      if (gameData) {
+        const newGame = await this.gameService.create({
+          rawgId: gameData.id,
+          name: gameData.name,
+          rating: gameData.rating,
+          released: gameData.released,
+          playtime: gameData.playtime,
+          background_image: gameData.background_image,
+          background_image_additional: gameData.background_image_additional,
+          genres: Array.isArray(gameData.genres)
+            ? gameData.genres.map((g: any) => g.name)
+            : [],
+          developers: Array.isArray(gameData.developers)
+            ? gameData.developers.map((d: any) => d.name)
+            : [],
+        });
+        existingGameMap.set(rawgId, newGame._id as ObjectId); // Cast explícito a ObjectId
       }
     }
   
-    console.log(`Game references to add:`, gameReferences);
+    // Crear un mapa de los juegos actuales en la lista para preservar su progreso
+    const currentGamesMap = new Map<string, ListGame>(
+      list.games.map(g => [g.gameId.toString(), g])
+    );
   
-    
+    // Crear un mapa de los nuevos juegos a agregar
+    const newGamesMap = new Map<string, ListGame>(
+      rawgIds.map(rawgId => {
+        const gameId = existingGameMap.get(rawgId);
+        if (!gameId) {
+          throw new HttpException(`Game with rawgId ${rawgId} not found`, HttpStatus.NOT_FOUND);
+        }
+        return [
+          gameId.toString(),
+          {
+            gameId: gameId as Types.ObjectId,
+            progress: currentGamesMap.get(gameId.toString())?.progress || ProgressEnum.None,
+          },
+        ];
+      })
+    );
   
-    // Ordenar los juegos en la lista por Average
-    list.games.sort((a, b) => {
-      const gameA = a.gameId instanceof Object ? (a.gameId as unknown as Game) : null;
-      const gameB = b.gameId instanceof Object ? (b.gameId as unknown as Game) : null;
+    // Fusionar los juegos actuales con los nuevos juegos
+    const mergedGamesMap = new Map([...currentGamesMap, ...newGamesMap]);
   
-      if (!gameA || !gameB) {
-        return 0;
-      }
+    // Convertir el mapa fusionado a una lista de juegos
+    const mergedGames = Array.from(mergedGamesMap.values());
   
-      const averageA = gameA.rating / (gameA.playtime || 1);
-      const averageB = gameB.rating / (gameB.playtime || 1);
+    // Obtener los juegos para ordenarlos
+    const sortedGames = await this.gameService.findLocalGamesByMongoId(
+      mergedGames.map(g => g.gameId.toString()) // Convierte ObjectId a string
+    );
+    sortedGames.sort((a, b) => (b.rating / b.playtime) - (a.rating / a.playtime));
   
-      return averageB - averageA;
-    });
-
-    // Agregar los juegos nuevos a la lista
-    list.games.push(...gameReferences);
-    console.log(`Games in the list after push:`, list.games);
-    console.log("Games: ", list.games);
+    // Actualizar la lista con los juegos fusionados y ordenados
+    list.games = sortedGames.map(game => ({
+      gameId: game._id as Types.ObjectId, // Cast explícito a Types.ObjectId
+      progress: mergedGamesMap.get(game._id.toString())?.progress || ProgressEnum.None,
+    }));
   
     list.gamesCount = list.games.length;
-  
-    await list.save();
-    console.log(`List saved successfully with ${list.games.length} games.`);
-  
-    return list;
+    return list.save();
   }
 
   async removeGamesFromList(listId: string, rawgIds: string[]): Promise<List> {
@@ -458,22 +395,30 @@ export class ListService {
     if (!list) {
       throw new HttpException('List not found', HttpStatus.NOT_FOUND);
     }
-  
+
     const gamesToRemove = new Set(rawgIds);
-  
+
     // Filtrar los juegos que deben permanecer en la lista
     list.games = list.games.filter((listGame) => {
       const game = listGame.gameId as unknown as Game;
       return game && !gamesToRemove.has(game.rawgId);
     });
-  
+
     list.gamesCount = list.games.length;
-  
+
     await list.save();
     console.log(`List updated successfully, remaining games: ${list.games.length}`);
-  
+
     return list;
   }
-  
-  
+
+  async getListWithGames(listId: string): Promise<List> {
+    const list = await this.listModel.findById(listId).populate('games.gameId');
+
+    if (!list) {
+      throw new HttpException('List not found', HttpStatus.NOT_FOUND);
+    }
+
+    return list;
+  }
 }
